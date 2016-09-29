@@ -23,8 +23,14 @@
     <div id="map"></div>
     <script>
 
+      $(document).ready(function() {
+        $.ajaxSetup({ cache: false });
+      });
+      
       function removeDuplicateConversations(conversations) {
-        return _.uniqBy(conversations, 'link'); 
+        return _.uniqBy(conversations, function (e) {
+          return e.coords + e.date + e.title;
+        });
       }
 
       function initMap() {
