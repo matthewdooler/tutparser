@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Requests</title>
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        height: 100%;
+      }
+
+      #map img[src*='kml'] {
+          opacity: .2;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+
+      function initMap() {
+
+        var manchester = {lat: 53.479167, lng: -2.244167};
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 11,
+          center: manchester
+        });
+
+        var metrolinkLayer = new google.maps.KmlLayer({
+          url: 'https://www.google.com/maps/d/u/0/kml?mid=11OJEPdRAqDjYNPXWu1NTo5rfcMQ&forcekml=1',
+          map: map
+        });
+
+        var transitLayer = new google.maps.TransitLayer();
+        transitLayer.setMap(map);
+
+        $.getJSON("conversations-with-coords.json", function(conversations) {
+          for (var key in conversations) {
+            conversation = conversations[key]
+            position = conversation.coords.split(",")
+            position = {lat: parseFloat(position[0]), lng: parseFloat(position[1])}
+            var marker = new google.maps.Marker({
+              position: position,
+              map: map,
+              title: conversation.title + " @ " + conversation.date,
+              label: conversation.title[0].toUpperCase()
+            });
+          }
+        });
+
+      }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAAwrJYcLbGYE0Jj2V_qZ1RdciKbc94kto&callback=initMap">
+    </script>
+  </body>
+</html>
