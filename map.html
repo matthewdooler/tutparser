@@ -23,6 +23,10 @@
     <div id="map"></div>
     <script>
 
+      function removeDuplicateConversations(conversations) {
+        return _.uniqBy(conversations, 'link'); 
+      }
+
       function initMap() {
 
         var manchester = {lat: 53.479167, lng: -2.244167};
@@ -40,6 +44,7 @@
         transitLayer.setMap(map);
 
         $.getJSON("conversations-with-coords.json", function(conversations) {
+          conversations = removeDuplicateConversations(conversations)
           for (var key in conversations) {
             conversation = conversations[key]
             position = conversation.coords.split(",")
@@ -59,5 +64,6 @@
     <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAAwrJYcLbGYE0Jj2V_qZ1RdciKbc94kto&callback=initMap">
     </script>
+    <script src="https://cdn.jsdelivr.net/lodash/4.16.2/lodash.min.js"></script>
   </body>
 </html>
