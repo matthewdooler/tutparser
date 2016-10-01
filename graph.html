@@ -4,194 +4,37 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <title>Requests</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   </head>
   <body>
 
-  	<div id="container-weekly" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
-  	<div id="container-daily" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+	
+	<div class="row">
+	  <div class="col-md-9">
+	    <div id="container-weekly" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+	    <div id="container-daily" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+	  </div>
+	  <div class="col-md-3">
+	  	<div id="container-current" style="width: 300px; height: 200px;"></div>
+	  </div>
+	</div>
 
-  	<script src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+  	<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+
+  	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<!--<script src="https://code.highcharts.com/stock/highstock.js"></script>-->
 	<script src="https://code.highcharts.com/highcharts.js"></script>
+	<script src="https://code.highcharts.com/highcharts-more.js"></script>
+	<script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
 	<script src="https://code.highcharts.com/modules/exporting.js"></script>
 
 	<script src="https://cdn.jsdelivr.net/lodash/4.16.2/lodash.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.1/moment.min.js"></script>
 
-	<script>
+	<script src="js/common.js"></script>
+	<script src="js/current-students.js"></script>
+	<script src="js/requests.js"></script>
 
-		$(document).ready(function() {
-		  $.ajaxSetup({ cache: false });
-		});
-
-		var input_date_format = 'DD/MM/YYYY'
-
-		function removeDuplicateConversations(conversations) {
-			return _.uniqBy(conversations, function (e) {
-			  return e.coords + e.date + e.title;
-			});
-		}
-
-		function createBuckets(resolution, conversations) {
-			// TODO: what about missing days/weeks/etc?
-
-			// Group conversations into buckets
-			var buckets = _.groupBy(
-				conversations, result =>
-					moment(result['date'], input_date_format).startOf(resolution).toISOString()
-				);
-
-			// Add any missing buckets (i.e., buckets without any conversations)
-			var start = _.min(Object.keys(buckets), function (key) { return buckets[key]; });
-			var end = moment()
-			for (var d = moment(start); d.isBefore(end); d.add(1, resolution)) {
-				dFormatted = d.toISOString()
-		    	if (!(dFormatted in buckets)) {
-		    		buckets[dFormatted] = []
-		    	}
-			}
-		    return buckets
-		}
-
-		function bucketsToTimeseriesCounts(buckets) {
-			counts = []
-			for (var key in buckets) {
-			  if (buckets.hasOwnProperty(key)) {
-			    counts.push([key, buckets[key].length])
-			  }
-			}
-			return counts.sort(function(a, b) { 
-				idx = 0
-			    return moment(a[idx]) > moment(b[idx]) ? 1 : -1;
-			});
-		}
-
-
-		$(function () {
-		    $.getJSON('conversations-with-coords.json', function (conversations) {
-		    	conversations = removeDuplicateConversations(conversations)
-
-		    	// month,isoWeek,day
-		    	buckets_weekly = createBuckets('week', conversations)
-		    	datapoints_weekly = bucketsToTimeseriesCounts(buckets_weekly)
-
-		        $('#container-weekly').highcharts({
-		            chart: {
-		                zoomType: 'x'
-		            },
-		            title: {
-		                text: 'Requests per week'
-		            },
-		            subtitle: {
-		                text: document.ontouchstart === undefined ?
-		                        'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
-		            },
-		            xAxis: {
-		                type: 'datetime'
-		            },
-		            yAxis: {
-		                title: {
-		                    text: 'Number of requests'
-		                },
-		                min: 0
-		            },
-		            legend: {
-		                enabled: false
-		            },
-		            plotOptions: {
-		                area: {
-		                    fillColor: {
-		                        linearGradient: {
-		                            x1: 0,
-		                            y1: 0,
-		                            x2: 0,
-		                            y2: 1
-		                        },
-		                        stops: [
-		                            [0, Highcharts.getOptions().colors[0]],
-		                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-		                        ]
-		                    },
-		                    marker: {
-		                        radius: 2
-		                    },
-		                    lineWidth: 1,
-		                    states: {
-		                        hover: {
-		                            lineWidth: 1
-		                        }
-		                    },
-		                    threshold: null
-		                }
-		            },
-
-		            series: [{
-		                type: 'area',
-		                name: 'Number of requests',
-		                data: datapoints_weekly
-		            }]
-		        });
-
-
-		        buckets_daily = createBuckets('day', conversations)
-		    	datapoints_daily = bucketsToTimeseriesCounts(buckets_daily)
-		        $('#container-daily').highcharts({
-		            chart: {
-		                zoomType: 'x'
-		            },
-		            title: {
-		                text: 'Requests per day'
-		            },
-		            subtitle: {
-		                text: document.ontouchstart === undefined ?
-		                        'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
-		            },
-		            xAxis: {
-		                type: 'datetime'
-		            },
-		            yAxis: {
-		                title: {
-		                    text: 'Number of requests'
-		                },
-		                min: 0
-		            },
-		            legend: {
-		                enabled: false
-		            },
-		            plotOptions: {
-		                area: {
-		                    fillColor: {
-		                        linearGradient: {
-		                            x1: 0,
-		                            y1: 0,
-		                            x2: 0,
-		                            y2: 1
-		                        },
-		                        stops: [
-		                            [0, Highcharts.getOptions().colors[0]],
-		                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-		                        ]
-		                    },
-		                    marker: {
-		                        radius: 2
-		                    },
-		                    lineWidth: 1,
-		                    states: {
-		                        hover: {
-		                            lineWidth: 1
-		                        }
-		                    },
-		                    threshold: null
-		                }
-		            },
-
-		            series: [{
-		                type: 'area',
-		                name: 'Number of requests',
-		                data: datapoints_daily
-		            }]
-		        });
-		    });
-		});
-	</script>
   </body>
 </html>
