@@ -50,7 +50,7 @@
         transitLayer.setMap(map);
 
         $.getJSON("data/conversations-with-coords.json", function(conversations) {
-          conversations = removeDuplicateConversations(conversations)
+          //conversations = removeDuplicateConversations(conversations)
           for (var key in conversations) {
             conversation = conversations[key]
             position = conversation.coords.split(",")
@@ -59,8 +59,13 @@
               position: position,
               map: map,
               title: conversation.title + " @ " + conversation.date,
-              label: conversation.title[0].toUpperCase()
+              label: conversation.title[0].toUpperCase(),
             });
+
+            if(conversation["match"]) {
+              marker.setIcon('images/euro.png');
+              marker.setLabel("");
+            }
           }
         });
 
