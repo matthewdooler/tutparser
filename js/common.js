@@ -51,7 +51,7 @@ function bucketsToTimeseriesCounts(buckets) {
 }
 
 $(function () {
-    $.getJSON('conversations-with-coords.json', function (conversations) {
+    $.getJSON('data/conversations-with-coords.json', function (conversations) {
         displayWeeklyRequestsGraph(conversations);
         displayDailyRequestsGraph(conversations);
         displayCurrentStudents(conversations);

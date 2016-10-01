@@ -49,7 +49,7 @@
         var transitLayer = new google.maps.TransitLayer();
         transitLayer.setMap(map);
 
-        $.getJSON("conversations-with-coords.json", function(conversations) {
+        $.getJSON("data/conversations-with-coords.json", function(conversations) {
           conversations = removeDuplicateConversations(conversations)
           for (var key in conversations) {
             conversation = conversations[key]
