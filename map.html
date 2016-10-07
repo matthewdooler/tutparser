@@ -51,20 +51,22 @@
 
         $.getJSON("data/conversations-with-coords.json", function(conversations) {
           //conversations = removeDuplicateConversations(conversations)
-          for (var key in conversations) {
+          for(var key in conversations) {
             conversation = conversations[key]
-            position = conversation.coords.split(",")
-            position = {lat: parseFloat(position[0]), lng: parseFloat(position[1])}
-            var marker = new google.maps.Marker({
-              position: position,
-              map: map,
-              title: conversation.title + " @ " + conversation.date,
-              label: conversation.title[0].toUpperCase(),
-            });
+            if('coords' in conversation) {
+              position = conversation.coords.split(",")
+              position = {lat: parseFloat(position[0]), lng: parseFloat(position[1])}
+              var marker = new google.maps.Marker({
+                position: position,
+                map: map,
+                title: conversation.title + " @ " + conversation.date,
+                label: conversation.title[0].toUpperCase(),
+              });
 
-            if(conversation["match"]) {
-              marker.setIcon('images/euro.png');
-              marker.setLabel("");
+              if(conversation["match"]) {
+                marker.setIcon('images/euro.png');
+                marker.setLabel("");
+              }
             }
           }
         });

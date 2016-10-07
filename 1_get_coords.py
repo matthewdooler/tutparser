@@ -74,8 +74,8 @@ def _http_get_with_cache_if_enabled(uri, params):
         return _http_get_without_cache(uri, params)
 
 def _http_get_without_cache(uri, params):
-	time.sleep(1)
-	return requests.get(uri, headers=headers)
+    time.sleep(1)
+    return requests.get(uri, headers=headers)
 
 class CachedHTTPResponse(object):
     def __init__(self, content, status_code):
@@ -90,15 +90,16 @@ with open('data/conversations.json') as f:
     conversations = json.load(f)
 
 for conversation in conversations:
-	request_uri = conversation["link"]
-	print request_uri
-	response = _http_get_with_cache_if_enabled(request_uri, params=[])
-	html_doc = response.text
-	soup = BeautifulSoup(html_doc, 'html.parser')
-	a = soup.find('a', text="Area Map")
-	link = a.attrs["href"]
-	coords_str = link.replace("https://maps.google.com/maps/api/staticmap?center=", "").split("&zoom")[0]
-	conversation["coords"] = coords_str
+    request_uri = conversation["link"]
+    print request_uri
+    response = _http_get_with_cache_if_enabled(request_uri, params=[])
+    html_doc = response.text
+    soup = BeautifulSoup(html_doc, 'html.parser')
+    a = soup.find('a', text="Area Map")
+    if a is not None:
+        link = a.attrs["href"]
+        coords_str = link.replace("https://maps.google.com/maps/api/staticmap?center=", "").split("&zoom")[0]
+        conversation["coords"] = coords_str
 
 output = json.dumps(conversations, ensure_ascii=False, indent=4, sort_keys=True)
 print output
